@@ -4,7 +4,7 @@ _Status: in development_
 
 For executives with executive dysfunction / ADHD etc., who are using windows and Outlook.
 
-I'm undiagnosed, but this chimes: [https://www.youtube.com/watch?v=_tpB-B8BXk0#t=4m30s]
+I'm undiagnosed, but this chimes: https://www.youtube.com/watch?v=_tpB-B8BXk0#t=4m30s
 
 Now that I've put everything in my calendar, the problem is getting my head out of my current work to go look at the calendar and notice the next meeting coming.
 
