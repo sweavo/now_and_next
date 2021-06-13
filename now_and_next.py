@@ -8,9 +8,9 @@ class App(TK.Frame):
         self.master.title('Hello World')
         self.master.tk_setPalette(background='#e6e6e6')
 
-        TK.Frame(self, width=200, height=300, 
+        TK.Frame(self, width=140, height=140, 
             bg='red').pack(side=TK.LEFT, fill=TK.BOTH)
-        TK.Frame(self, width=300, height=300, 
+        TK.Frame(self, width=280, height=140, 
             bg='green').pack(side=TK.RIGHT, fill=TK.BOTH, expand=TK.YES)
 
 if __name__ == "__main__":
