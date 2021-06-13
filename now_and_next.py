@@ -16,4 +16,5 @@ class App(TK.Frame):
 if __name__ == "__main__":
     root = TK.Tk()
     app = App(root)
+    root.wm_attributes("-topmost", 1)
     app.mainloop()

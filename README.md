@@ -1,9 +1,8 @@
 # now_and_next
 
-Status: in development
+_Status: in development_
 
-
-For executives with executive dysfunction / ADHD etc.
+For executives with executive dysfunction / ADHD etc., who are using windows and Outlook.
 
 I'm undiagnosed, but this chimes: [https://www.youtube.com/watch?v=_tpB-B8BXk0#t=4m30s]
 
