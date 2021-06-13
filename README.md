@@ -1,6 +1,6 @@
 # now_and_next
 
-_Status: in development_
+_Status: pre-pre-pre-alpha.  Give me till 2021-06-15
 
 For executives with executive dysfunction / ADHD etc., who are using windows and Outlook.
 
