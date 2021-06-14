@@ -89,5 +89,9 @@ class NowAndNextUI(TK.Frame):
 if __name__ == "__main__":
     root = TK.Tk()
     app = NowAndNextUI(root)
+    root.title('Now & Next')
+    root.attributes('-topmost', 1)
+    root.geometry(f'450x150')
+
     root.wm_attributes("-topmost", 1)
     app.mainloop()
