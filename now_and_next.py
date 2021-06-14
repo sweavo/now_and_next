@@ -8,10 +8,13 @@ class App(TK.Frame):
         self.master.title('Hello World')
         self.master.tk_setPalette(background='#e6e6e6')
 
-        TK.Frame(self, width=140, height=140, 
-            bg='red').pack(side=TK.LEFT, fill=TK.BOTH)
+        left_frame = TK.Frame(self, width=140, height=140, 
+            bg='red')
         TK.Frame(self, width=280, height=140, 
             bg='green').pack(side=TK.RIGHT, fill=TK.BOTH, expand=TK.YES)
+
+        TK.Canvas(left_frame, width=100,height=100, bg='yellow').pack()
+        left_frame.pack(side=TK.LEFT, fill=TK.BOTH)
 
 if __name__ == "__main__":
     root = TK.Tk()
