@@ -1,3 +1,9 @@
+"""
+TODO
+
+Set a minimum size or stop the clockface from breaking when you go too small
+"""
+
 import tkinter as TK
 
 CLOCK_FACE_COLOR='white'
