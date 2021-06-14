@@ -62,7 +62,7 @@ class TimerWidget(TK.Canvas):
         seconds=int(seconds) % 60
         self.itemconfig(self.clock_label, text=f'{int(minutes):02}:{seconds:02}')
 
-class App(TK.Frame):
+class NowAndNextUI(TK.Frame):
     def __init__(self,master):    
         TK.Frame.__init__(self,master,padx=20, pady=15)
         self.pack(expand=TK.YES, fill=TK.BOTH)
@@ -82,6 +82,6 @@ class App(TK.Frame):
 
 if __name__ == "__main__":
     root = TK.Tk()
-    app = App(root)
+    app = NowAndNextUI(root)
     root.wm_attributes("-topmost", 1)
     app.mainloop()
