@@ -3,27 +3,92 @@ TODO
 
 Set a minimum size or stop the clockface from breaking when you go too small
 """
+from collections import namedtuple
 import datetime
-
+import locale
 import tkinter as TK
+import win32com.client
+
+## Constants for time topic
+
+DEBUG_TIME_OFFSET=datetime.timedelta(seconds=3600)
+#DEBUG_TIME_OFFSET=datetime.timedelta(hours=-10,seconds=900)
+
+## Constants for UI topic
 
 CLOCK_FACE_COLOR='white'
 ARC_COLOR='pink'
 CLOCK_PADDING=10
 
-## Time Stuff
+## Constants for Calendar/Outlook topic
 
-DEBUG_TIME_OFFSET=datetime.timedelta(seconds=3600)
-#DEBUG_TIME_OFFSET=datetime.timedelta(hours=-10,seconds=900)
+LANGUAGE='en_GB'
+
+Event = namedtuple("Event", "start subject duration")
+
+## Code for time topic
+
 def get_cursor():
     """ Return the time that we are interested in """
     cursor=datetime.datetime.now(datetime.timezone.utc) + DEBUG_TIME_OFFSET
     # log what time offset caused 
     return cursor
 
-## Calendar/Outlook stuff
+## Code for Calendar/Outlook topic
 
-## UI stuffs
+def locale_specific_date_string( date_time ):
+    """ python on top of Windows needs a little help with locales.
+        This function converts a datetime into a string usable by Office queries
+    """
+    locale.setlocale(locale.LC_ALL, LANGUAGE)
+    return date_time.date().strftime('%x')
+
+def getAppointments():
+    """ not sure what Outlook this uses, I'm guessing it's the running Outlook
+        instance.
+    """ 
+    outlook_session = win32com.client.Dispatch("Outlook.Application")
+    ns = outlook_session.GetNamespace("MAPI")
+    return ns.GetDefaultFolder(9).Items
+
+def getCalendarEntries(days=1):
+    """
+    """
+    period_start = datetime.datetime.today()
+    after_period_end = datetime.timedelta(days=days) + period_start
+
+    appointments = getAppointments()
+    appointments.Sort("[Start]")
+    appointments.IncludeRecurrences = "True"
+
+    lsds = locale_specific_date_string # shorter name for readable string below
+    restricted_appointments = appointments.Restrict(
+        f"[Start] >= '{lsds(period_start)}' AND [Start] < '{lsds(after_period_end)}'")
+    
+    for appointment in restricted_appointments:
+        yield Event(appointment.Start, appointment.Subject, appointment.Duration)
+
+def get_now_and_next( entries, cursor):
+    """ Return a tuple of ( <ongoing events with end times>, <next event including start time> )
+    """
+    now=[]
+
+    for entry in entries:
+        minutes_till_start = (entry.start - cursor) / datetime.timedelta(minutes=1)
+        minutes_till_end = minutes_till_start + entry.duration
+
+        if minutes_till_start<=0:
+            if minutes_till_end>0:
+                now.append((entry, cursor + datetime.timedelta(seconds=60*minutes_till_end)))
+        else:
+            return now, entry
+
+def refresh_database(cursor):
+    """ To be called infrequently, returns a tuple of ongoing, upcoming meetings. """
+    events = list( getCalendarEntries(4) )
+    return get_now_and_next( events, cursor )
+
+## Code for UI topic
 
 def biggest_square(x1,y1,x2,y2):
     """ return x,y,x2,y2 for a square centered in the given 
@@ -89,7 +154,8 @@ class NowAndNextUI(TK.Frame):
         self.pack(expand=TK.YES, fill=TK.BOTH)
 
         left_frame = TK.Frame(self, width=140, height=140)
-        self.clock_face=TimerWidget(left_frame, width=140,height=140).pack(side=TK.TOP)
+        self.clock_face=TimerWidget(left_frame, width=140,height=140)
+        self.clock_face.pack(side=TK.TOP)
         left_frame.pack(side=TK.LEFT, fill=TK.BOTH)
 
         right_frame=TK.Frame(self, width=280, height=140)
