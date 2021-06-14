@@ -2,7 +2,7 @@ import tkinter as TK
 
 CLOCK_FACE_COLOR='white'
 ARC_COLOR='pink'
-CLOCK_PADDING=50
+CLOCK_PADDING=10
 
 def biggest_square(x1,y1,x2,y2):
     """ return x,y,x2,y2 for a square centered in the given 
@@ -70,13 +70,11 @@ class App(TK.Frame):
         self.master.title('Hello World')
         self.master.tk_setPalette(background='#e6e6e6')
 
-        left_frame = TK.Frame(self, width=140, height=140, 
-            bg='red')
-        self.clock_face=TimerWidget(left_frame, width=140,height=140 ).pack(side=TK.TOP)
+        left_frame = TK.Frame(self, width=140, height=140)
+        self.clock_face=TimerWidget(left_frame, width=140,height=140).pack(side=TK.TOP)
         left_frame.pack(side=TK.LEFT, fill=TK.BOTH)
 
-        right_frame=TK.Frame(self, width=280, height=140, 
-            bg='green')
+        right_frame=TK.Frame(self, width=280, height=140)
         self.next_label = TK.Label(right_frame, text='Awaiting data...',justify=TK.LEFT)
         self.next_label.pack(side=TK.LEFT, expand=TK.YES, fill=TK.BOTH)
         right_frame.pack(side=TK.RIGHT, expand=TK.YES, fill=TK.BOTH)
