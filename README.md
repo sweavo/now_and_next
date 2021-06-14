@@ -1,5 +1,8 @@
 # now_and_next
 
+![Screenshot](doc/img/screenshot1.png)
+
+
 Status: *basically working*
 
 For executives with executive dysfunction / ADHD etc., who are using windows and Outlook.
