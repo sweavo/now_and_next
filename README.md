@@ -6,13 +6,15 @@ Put time in your visual field so that you are not perpetually late for meetings.
 
 Keywords: Time-blindness, ADHD, executive dysfunction, neurodiversity.
 
-Status: *basically working*, accepting pull requests.
+### Status
+
+ *basically working*, accepting pull requests.
 
 ## Purpose
 
-*as a* person with time-blindness who has to mix appointments and other work
-*I want* to be constantly reminded how ling it is until my next appointment
-*so that* I can manage my work and show up to meetings on time.
+* **As a** person with time-blindness who has to mix appointments and other work,
+* **I want** to be constantly reminded how long it is until my next appointment
+* **so that** I can manage my work and show up to meetings on time.
 
 As my job role changed from one with a lot of deep work to one with a lot of appointments it's become necessary to plan my time carefully using the calendar.  The problem now is getting my head out of my current work even to go look at the calendar and notice the next meeting coming.
 
@@ -31,7 +33,7 @@ Time-blindness is an ingredient of ADHD, which is explained well in the followin
 
 ### Installation
 
-Just clone the repo or download now_and_next.py someplace to your taste.
+Just clone the repo or download `now_and_next.py` someplace to your taste.
 
 ### Operation
 
