@@ -115,7 +115,7 @@ class TimerWidget(TK.Canvas):
         """ given a timedelta, update the clockface.
         right now the face is 1 hour in minutes.
         """
-        seconds = delta.total_seconds()
+        seconds = min(3600,delta.total_seconds())
         # The sweep goes in half-minute increments
         degrees = float(seconds // 30) * -3.0
         self.itemconfig(self.clock_arc, extent=degrees)
