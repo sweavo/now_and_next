@@ -140,7 +140,7 @@ class NowAndNextUI(TK.Frame):
 
     def refresh_canvas(self):
         self.after(1000, self.refresh_canvas)
-        time_now = get_cursor()
+        time_now = get_cursor() # TODO this dependency should be injected
 
         if time_now.minute != self.previous_minute:
             ongoing, upcoming = refresh_database(time_now)
