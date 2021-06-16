@@ -11,8 +11,8 @@ import win32com.client
 
 ## Constants for time topic
 
-DEBUG_TIME_OFFSET=datetime.timedelta(seconds=3600)
-#DEBUG_TIME_OFFSET=datetime.timedelta(hours=-10,seconds=900)
+DEBUG_TIME_OFFSET=datetime.timedelta(seconds=3600) # Manually set for BST, TODO get from the environment
+#DEBUG_TIME_OFFSET=datetime.timedelta(hours=0)
 
 ## Constants for UI topic
 
@@ -25,6 +25,13 @@ CLOCK_PADDING=10
 LANGUAGE='en_GB'
 
 Event = namedtuple("Event", "start subject duration")
+
+olResponseAccepted=3
+olResponseDeclined=4
+olResponseNone=0
+olResponseNotResponded=5
+olResponseOrganized=1
+olResponseTentative=2
 
 ## Code for time topic
 
@@ -66,7 +73,8 @@ def getCalendarEntries(days=1):
         f"[Start] >= '{lsds(period_start)}' AND [Start] < '{lsds(after_period_end)}'")
     
     for appointment in restricted_appointments:
-        yield Event(appointment.Start, appointment.Subject, appointment.Duration)
+        if appointment.ResponseStatus not in [ olResponseDeclined, olResponseTentative ]:
+            yield Event(appointment.Start, appointment.Subject, appointment.Duration)
 
 def get_now_and_next( entries, cursor):
     """ Return a tuple of ( <ongoing events with end times>, <next event including start time> )
