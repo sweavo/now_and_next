@@ -59,7 +59,8 @@ def getAppointments():
     return ns.GetDefaultFolder(9).Items
 
 def getCalendarEntries(days=1):
-    """
+    """ generator function to get the appointments from today for `days` days, 
+        retrieved from Outlook into a python structure
     """
     period_start = datetime.datetime.today()
     after_period_end = datetime.timedelta(days=days) + period_start
@@ -105,6 +106,9 @@ def refresh_database(cursor):
 ## Code for UI topic
 
 class TimerWidget(TK.Canvas):
+    """ TKInter widget to display a round clockface with a coloured segment to indicate
+        minutes remaining
+    """
     def __init__(self, parent, **kwargs):
         TK.Canvas.__init__(self, parent, highlightthickness=0, **kwargs)
         self.height = self.winfo_reqheight()
@@ -138,6 +142,8 @@ class TimerWidget(TK.Canvas):
         self.itemconfig(self.clock_label, text=f'{int(minutes):02}:{seconds:02}')
 
 class NowAndNextUI(TK.Frame):
+    """ TKInter main UI 
+    """
     def __init__(self,master):    
         TK.Frame.__init__(self,master,padx=15, pady=10)
         self.pack(expand=TK.YES, fill=TK.BOTH)
@@ -153,6 +159,7 @@ class NowAndNextUI(TK.Frame):
         right_frame.pack(side=TK.RIGHT, expand=TK.YES, fill=TK.BOTH)
 
     def refresh_canvas(self):
+        """ Every second, update the display. """
         self.after(1000, self.refresh_canvas)
         time_now = get_cursor() # TODO this dependency should be injected
 
