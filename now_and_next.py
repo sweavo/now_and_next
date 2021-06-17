@@ -94,7 +94,8 @@ def get_now_and_next( entries, cursor):
         elif minutes_till_start<60:
             upcoming.append(record)
         else:
-            return ongoing, upcoming
+            break
+    return ongoing, upcoming
 
 def refresh_database(cursor):
     """ To be called infrequently, returns a tuple of ongoing, upcoming meetings. """
