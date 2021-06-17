@@ -24,7 +24,7 @@ CLOCK_PADDING=10
 
 LANGUAGE='en_GB'
 
-Event = namedtuple("Event", "start subject duration")
+Event = namedtuple("Event", "start end subject ")
 
 olResponseAccepted=3
 olResponseDeclined=4
@@ -75,7 +75,9 @@ def getCalendarEntries(days=1):
     
     for appointment in restricted_appointments:
         if appointment.ResponseStatus not in [ olResponseDeclined, olResponseTentative ]:
-            yield Event(appointment.Start, appointment.Subject, appointment.Duration)
+            start_time = appointment.Start
+            end_time = start_time + datetime.timedelta(seconds=60 * appointment.Duration)
+            yield Event(start_time, end_time, appointment.Subject)
 
 def get_now_and_next( entries, cursor):
     """ Return a tuple of ( <ongoing events with end times>, <next event including start time> )
@@ -85,15 +87,13 @@ def get_now_and_next( entries, cursor):
 
     for entry in entries:
         minutes_till_start = (entry.start - cursor) / datetime.timedelta(minutes=1)
-        minutes_till_end = minutes_till_start + entry.duration
-
-        record = (entry, cursor + datetime.timedelta(seconds=60*minutes_till_end))
+        minutes_till_end = (entry.end - cursor) / datetime.timedelta(minutes=1)
 
         if minutes_till_start<=0:
             if minutes_till_end>0:
-                ongoing.append(record)
+                ongoing.append(entry)
         elif minutes_till_start<60:
-            upcoming.append(record)
+            upcoming.append(entry)
         else:
             break
     return ongoing, upcoming
@@ -165,12 +165,12 @@ class NowAndNextUI(TK.Frame):
 
         if time_now.minute != self.previous_minute:
             ongoing, upcoming = refresh_database(time_now)
-            self.next_deadline = upcoming[0][0].start
+            self.next_deadline = upcoming[0].start
             self.previous_minute = time_now.minute
             lines = [time_now.strftime('%c')]
-            lines.extend(map(lambda ev: f'    {ev[0].subject}', ongoing )) 
-            lines.append(f'Next:\n    {upcoming[0][0].subject}')
-            lines.extend(map(lambda ev: f'    +{int((ev[0].start-self.next_deadline).total_seconds() / 60)}m {ev[0].subject}', upcoming[1:]))
+            lines.extend(map(lambda ev: f'    {ev.subject}', ongoing )) 
+            lines.append(f'Next:\n    {upcoming[0].subject}')
+            lines.extend(map(lambda ev: f'    +{int((ev.start-self.next_deadline).total_seconds() / 60)}m {ev.subject}', upcoming[1:]))
             
             self.next_label.config(text='\n'.join(lines))
 
