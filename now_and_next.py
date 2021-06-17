@@ -179,7 +179,7 @@ class NowAndNextUI(TK.Frame):
 
     def mainloop(self):
         self.previous_minute = None
-        self.after(1000, self.refresh_canvas)
+        self.after(10, self.refresh_canvas)
         self.master.mainloop()
 
 
