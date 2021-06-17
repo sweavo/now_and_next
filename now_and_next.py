@@ -162,12 +162,12 @@ class NowAndNextUI(TK.Frame):
         """ Every second, update the display. """
         self.after(1000, self.refresh_canvas)
         time_now = get_cursor() # TODO this dependency should be injected
-
+        time_to_the_minute = time_now-datetime.timedelta(seconds=time_now.second)
         if time_now.minute != self.previous_minute:
             ongoing, upcoming = refresh_database(time_now)
             self.next_deadline = upcoming[0].start
             self.previous_minute = time_now.minute
-            lines = [time_now.strftime('%c')]
+            lines = [time_to_the_minute.strftime('%c')]
             lines.extend(map(lambda ev: f'    {ev.subject}', ongoing )) 
             lines.append(f'Next:\n    {upcoming[0].subject}')
             lines.extend(map(lambda ev: f'    +{int((ev.start-self.next_deadline).total_seconds() / 60)}m {ev.subject}', upcoming[1:]))
