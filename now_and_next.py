@@ -79,7 +79,8 @@ def getCalendarEntries(days=1):
 def get_now_and_next( entries, cursor):
     """ Return a tuple of ( <ongoing events with end times>, <next event including start time> )
     """
-    now=[]
+    ongoing=[]
+    upcoming=[]
 
     for entry in entries:
         minutes_till_start = (entry.start - cursor) / datetime.timedelta(minutes=1)
@@ -87,9 +88,11 @@ def get_now_and_next( entries, cursor):
 
         if minutes_till_start<=0:
             if minutes_till_end>0:
-                now.append((entry, cursor + datetime.timedelta(seconds=60*minutes_till_end)))
+                ongoing.append((entry, cursor + datetime.timedelta(seconds=60*minutes_till_end)))
+        elif minutes_till_start<60:
+            upcoming.append((entry, cursor + datetime.timedelta(seconds=60*minutes_till_end)))
         else:
-            return now, entry
+            return ongoing, upcoming
 
 def refresh_database(cursor):
     """ To be called infrequently, returns a tuple of ongoing, upcoming meetings. """
@@ -152,11 +155,12 @@ class NowAndNextUI(TK.Frame):
 
         if time_now.minute != self.previous_minute:
             ongoing, upcoming = refresh_database(time_now)
-            self.next_deadline = upcoming.start
+            self.next_deadline = upcoming[0][0].start
             self.previous_minute = time_now.minute
             lines = [time_now.strftime('%c')]
-            lines.extend(map( lambda ev: f'    {ev[0].subject}', ongoing )) 
-            lines.append(f'Next:\n    {upcoming.subject}')
+            lines.extend(map(lambda ev: f'    {ev[0].subject}', ongoing )) 
+            lines.append(f'Next:\n    {upcoming[0][0].subject}')
+            lines.extend(map(lambda ev: f'    +{int((ev[0].start-self.next_deadline).total_seconds() / 60)}m {ev[0].subject}', upcoming[1:]))
             
             self.next_label.config(text='\n'.join(lines))
 
