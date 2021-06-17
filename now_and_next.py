@@ -86,11 +86,13 @@ def get_now_and_next( entries, cursor):
         minutes_till_start = (entry.start - cursor) / datetime.timedelta(minutes=1)
         minutes_till_end = minutes_till_start + entry.duration
 
+        record = (entry, cursor + datetime.timedelta(seconds=60*minutes_till_end))
+
         if minutes_till_start<=0:
             if minutes_till_end>0:
-                ongoing.append((entry, cursor + datetime.timedelta(seconds=60*minutes_till_end)))
+                ongoing.append(record)
         elif minutes_till_start<60:
-            upcoming.append((entry, cursor + datetime.timedelta(seconds=60*minutes_till_end)))
+            upcoming.append(record)
         else:
             return ongoing, upcoming
 
