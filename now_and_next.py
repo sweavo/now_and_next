@@ -154,7 +154,11 @@ class NowAndNextUI(TK.Frame):
         left_frame.pack(side=TK.LEFT)
 
         right_frame=TK.Frame(self, width=280, height=140)
-        self.next_label = TK.Label(right_frame, text='Awaiting data...',justify=TK.LEFT)
+        self.next_label = TK.Label(right_frame, 
+            text='Awaiting data...',
+            anchor=TK.NW,
+            wraplength=300,
+            justify=TK.LEFT)
         self.next_label.pack(side=TK.LEFT, expand=TK.YES, fill=TK.BOTH)
         right_frame.pack(side=TK.RIGHT, expand=TK.YES, fill=TK.BOTH)
 
