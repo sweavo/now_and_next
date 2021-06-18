@@ -72,7 +72,7 @@ def getCalendarEntries(days=1):
     lsds = locale_specific_date_string # shorter name for readable string below
     restricted_appointments = appointments.Restrict(
         f"[Start] >= '{lsds(period_start)}' AND [Start] < '{lsds(after_period_end)}'")
-    
+
     for appointment in restricted_appointments:
         if appointment.ResponseStatus not in [ olResponseDeclined, olResponseTentative ]:
             start_time = appointment.Start
@@ -141,10 +141,18 @@ class TimerWidget(TK.Canvas):
         seconds=int(seconds) % 60
         self.itemconfig(self.clock_label, text=f'{int(minutes):02}:{seconds:02}')
 
+class ResizingLabel(TK.Label):
+    def __init__(self,*args,**kwargs):
+        TK.Label.__init__(self,*args,**kwargs)
+        self.bind('<Configure>', self.handle_resize)
+
+    def handle_resize(self,event):
+        self['wraplength']=event.width
+
 class NowAndNextUI(TK.Frame):
     """ TKInter main UI 
     """
-    def __init__(self,master):    
+    def __init__(self,master):
         TK.Frame.__init__(self,master,padx=15, pady=10)
         self.pack(expand=TK.YES, fill=TK.BOTH)
 
@@ -154,7 +162,11 @@ class NowAndNextUI(TK.Frame):
         left_frame.pack(side=TK.LEFT)
 
         right_frame=TK.Frame(self, width=280, height=140)
-        self.next_label = TK.Label(right_frame, text='Awaiting data...',justify=TK.LEFT)
+        self.next_label=ResizingLabel(right_frame, 
+            text='Awaiting data...',
+            anchor=TK.NW,
+            wraplength=300,
+            justify=TK.LEFT)
         self.next_label.pack(side=TK.LEFT, expand=TK.YES, fill=TK.BOTH)
         right_frame.pack(side=TK.RIGHT, expand=TK.YES, fill=TK.BOTH)
 
@@ -180,7 +192,6 @@ class NowAndNextUI(TK.Frame):
             self.next_label.config(text='\n'.join(lines))
 
         self.clock_face.set_time( self.next_deadline - time_now )
-
 
     def mainloop(self):
         self.previous_minute = None
