@@ -164,14 +164,19 @@ class NowAndNextUI(TK.Frame):
         time_now = get_cursor() # TODO this dependency should be injected
         time_to_the_minute = time_now-datetime.timedelta(seconds=time_now.second)
         if time_now.minute != self.previous_minute:
-            ongoing, upcoming = refresh_database(time_now)
-            self.next_deadline = upcoming[0].start
             self.previous_minute = time_now.minute
+
+            ongoing, upcoming = refresh_database(time_now)
             lines = [time_to_the_minute.strftime('%c')]
             lines.extend(map(lambda ev: f'    {ev.subject}', ongoing )) 
-            lines.append(f'Next:\n    {upcoming[0].subject}')
-            lines.extend(map(lambda ev: f'    +{int((ev.start-self.next_deadline).total_seconds() / 60)}m {ev.subject}', upcoming[1:]))
-            
+
+            if len(upcoming):
+                self.next_deadline = upcoming[0].start
+                lines.append(f'Next:\n    {upcoming[0].subject}')
+                lines.extend(map(lambda ev: f'    +{int((ev.start-self.next_deadline).total_seconds() / 60)}m {ev.subject}', upcoming[1:]))
+            else:
+                self.next_deadline = time_now + datetime.timedelta(3600)
+
             self.next_label.config(text='\n'.join(lines))
 
         self.clock_face.set_time( self.next_deadline - time_now )
