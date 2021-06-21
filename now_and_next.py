@@ -17,7 +17,7 @@ DEBUG_TIME_OFFSET=datetime.timedelta(seconds=3600) # Manually set for BST, TODO 
 ## Constants for UI topic
 
 CLOCK_FACE_COLOR='white'
-ARC_COLOR='pink'
+ARC_COLORS=['#ffaaaa', '#aaccff', '#ffaaff']
 CLOCK_PADDING=10
 
 ## Constants for Calendar/Outlook topic
@@ -119,14 +119,7 @@ class TimerWidget(TK.Canvas):
                          self.height-CLOCK_PADDING,
                          self.height-CLOCK_PADDING,
                          fill=CLOCK_FACE_COLOR)
-        self.clock_arc=self.create_arc(CLOCK_PADDING+5,
-                        CLOCK_PADDING+5,
-                        self.height-CLOCK_PADDING-5,
-                        self.height-CLOCK_PADDING-5,
-                        start=90,
-                        extent=-180,
-                        fill=ARC_COLOR,
-                        outline="")
+        self.arcs=[]
         self.clock_label = self.create_text(self.height/2,self.height/2,justify=TK.CENTER,text="00:00",font=('Monoid','22',''))
 
     def set_time( self, delta ):
@@ -135,11 +128,62 @@ class TimerWidget(TK.Canvas):
         """
         seconds = min(3600,delta.total_seconds())
         # The sweep goes in half-minute increments
-        degrees = float(seconds // 30) * -3.0
-        self.itemconfig(self.clock_arc, extent=degrees)
-        minutes = int(seconds / 60)
+        degrees = float(seconds // 30) * 3.0
+        self.set_arcs([degrees])
+        minutes=int(seconds / 60)
         seconds=int(seconds) % 60
         self.itemconfig(self.clock_label, text=f'{int(minutes):02}:{seconds:02}')
+
+    def set_times(self, timedeltas ):
+        """ given a list of timedeltas, draw the arcs representing them
+            timedeltas are relative to one another.
+        """
+        angles =[]
+
+        for timedelta in timedeltas:
+            seconds = min(3600,timedelta.total_seconds())
+            angles.append(float(seconds // 30) * 3.0)
+
+        self.set_arcs(angles)
+
+        if len(timedeltas) > 0:
+            seconds = min(3600,timedeltas[0].total_seconds())
+            minutes=int(seconds / 60)
+            seconds=int(seconds) % 60
+            self.itemconfig(self.clock_label, text=f'{int(minutes):02}:{seconds:02}')
+        self.tag_raise(self.clock_label)
+
+        
+    def set_arcs(self, angle_deltas):
+        """ given a list of degrees-of-arc, set the clockface to a series of arcs of those 
+            subtensions.  Each angle is incremental: [ 45, 45 ] occupies the first 90 degrees 
+            of the circle.
+
+            Coordinate system is clockwise from north, whereas TkInter's is CCW from east.
+        """
+        while len(angle_deltas) < len(self.arcs):
+            self.delete(self.arcs.pop())
+        
+        start=90
+        for index, angle_delta in enumerate(angle_deltas):
+            extent=-angle_delta
+            color=ARC_COLORS[index % len(ARC_COLORS)]
+
+            if index >= len(self.arcs):
+                self.arcs.append(
+                    self.create_arc(
+                        CLOCK_PADDING+5,
+                        CLOCK_PADDING+5,
+                        self.height-CLOCK_PADDING-5,
+                        self.height-CLOCK_PADDING-5,
+                        start=start,
+                        extent=extent,
+                        fill=color,
+                        outline=""))
+            else:
+                self.itemconfig(self.arcs[index], start=start, extent=extent, fill=color)
+            start+=extent
+
 
 class ResizingLabel(TK.Label):
     def __init__(self,*args,**kwargs):
@@ -170,6 +214,9 @@ class NowAndNextUI(TK.Frame):
         self.next_label.pack(side=TK.LEFT, expand=TK.YES, fill=TK.BOTH)
         right_frame.pack(side=TK.RIGHT, expand=TK.YES, fill=TK.BOTH)
 
+        self.next_deadline=get_cursor()
+        self.following=[]
+
     def refresh_canvas(self):
         """ Every second, update the display. """
         self.after(1000, self.refresh_canvas)
@@ -186,12 +233,15 @@ class NowAndNextUI(TK.Frame):
                 self.next_deadline = upcoming[0].start
                 lines.append(f'Next:\n    {upcoming[0].subject}')
                 lines.extend(map(lambda ev: f'    +{int((ev.start-self.next_deadline).total_seconds() / 60)}m {ev.subject}', upcoming[1:]))
+                
+                # All except the first delay can be precalculated
+                self.following=list(map( lambda pair: pair[1].start-pair[0].start, zip( upcoming[:-1],upcoming[1:] )))
             else:
                 self.next_deadline = time_now + datetime.timedelta(3600)
 
             self.next_label.config(text='\n'.join(lines))
 
-        self.clock_face.set_time( self.next_deadline - time_now )
+        self.clock_face.set_times( [ self.next_deadline - time_now ] + self.following )
 
     def mainloop(self):
         self.previous_minute = None
