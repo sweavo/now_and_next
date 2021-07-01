@@ -57,11 +57,10 @@ def getAppointments():
     ns = outlook_session.GetNamespace("MAPI")
     return ns.GetDefaultFolder(9).Items
 
-def getCalendarEntries(first_day, days=1):
+def getCalendarEntries(period_start, days=1):
     """ generator function to get the appointments from today for `days` days,
         retrieved from Outlook into a python structure
     """
-    period_start = first_day
     after_period_end = datetime.timedelta(days=days) + period_start
 
     appointments = getAppointments()
