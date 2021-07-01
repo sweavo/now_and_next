@@ -22,9 +22,26 @@ CLOCK_PADDING=10
 
 ## Constants for Calendar/Outlook topic
 
-LANGUAGE='en_GB'
-
-Event = namedtuple("Event", "start end subject ")
+olFolderCalendar=9
+olFolderConflicts=19
+olFolderContacts=10
+olFolderDeletedItems=3
+olFolderDrafts=16
+olFolderInbox=6
+olFolderJournal=11
+olFolderJunk=23
+olFolderLocalFailures=21
+olFolderManagedEmail=29
+olFolderNotes=12
+olFolderOutbox=4
+olFolderSentMail=5
+olFolderServerFailures=22
+olFolderSuggestedContacts=30
+olFolderSyncIssues=20
+olFolderTasks=13
+olFolderToDo=28
+olPublicFoldersAllPublicFolders=18
+olFolderRssFeeds=25
 
 olResponseAccepted=3
 olResponseDeclined=4
@@ -32,6 +49,15 @@ olResponseNone=0
 olResponseNotResponded=5
 olResponseOrganized=1
 olResponseTentative=2
+
+## Application data types
+
+Event = namedtuple("Event", "start end subject ")
+
+## Application configuration constants
+
+LANGUAGE='en_GB'
+
 
 ## Code for time topic
 
@@ -49,13 +75,14 @@ def locale_specific_date_string( date_time ):
     locale.setlocale(locale.LC_ALL, LANGUAGE)
     return date_time.date().strftime('%x')
 
-def getAppointments():
+def get_standard_folder_items(ol_folder_id):
     """ not sure what Outlook this uses, I'm guessing it's the running Outlook
         instance.
+        Get the items from a standard folder
     """
     outlook_session = win32com.client.Dispatch("Outlook.Application")
     ns = outlook_session.GetNamespace("MAPI")
-    return ns.GetDefaultFolder(9).Items
+    return ns.GetDefaultFolder(ol_folder_id).Items
 
 def getCalendarEntries(period_start, days=1):
     """ generator function to get the appointments from today for `days` days,
@@ -63,7 +90,7 @@ def getCalendarEntries(period_start, days=1):
     """
     after_period_end = datetime.timedelta(days=days) + period_start
 
-    appointments = getAppointments()
+    appointments = get_standard_folder_items(olFolderCalendar)
     appointments.Sort("[Start]")
     appointments.IncludeRecurrences = "True"
 
