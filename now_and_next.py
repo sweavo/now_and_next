@@ -12,7 +12,7 @@ import win32com.client
 ## Constants for time topic
 
 DEBUG_TIME_OFFSET=datetime.timedelta(seconds=3600) # Manually set for BST, TODO get from the environment
-#DEBUG_TIME_OFFSET=datetime.timedelta(hours=0)
+#DEBUG_TIME_OFFSET=datetime.timedelta(hours=-16)
 
 ## Constants for UI topic
 
@@ -38,7 +38,6 @@ olResponseTentative=2
 def get_cursor():
     """ Return the time that we are interested in """
     cursor=datetime.datetime.now(datetime.timezone.utc) + DEBUG_TIME_OFFSET
-    # log what time offset caused 
     return cursor
 
 ## Code for Calendar/Outlook topic
@@ -53,16 +52,16 @@ def locale_specific_date_string( date_time ):
 def getAppointments():
     """ not sure what Outlook this uses, I'm guessing it's the running Outlook
         instance.
-    """ 
+    """
     outlook_session = win32com.client.Dispatch("Outlook.Application")
     ns = outlook_session.GetNamespace("MAPI")
     return ns.GetDefaultFolder(9).Items
 
-def getCalendarEntries(days=1):
-    """ generator function to get the appointments from today for `days` days, 
+def getCalendarEntries(first_day, days=1):
+    """ generator function to get the appointments from today for `days` days,
         retrieved from Outlook into a python structure
     """
-    period_start = datetime.datetime.today()
+    period_start = first_day
     after_period_end = datetime.timedelta(days=days) + period_start
 
     appointments = getAppointments()
@@ -70,8 +69,8 @@ def getCalendarEntries(days=1):
     appointments.IncludeRecurrences = "True"
 
     lsds = locale_specific_date_string # shorter name for readable string below
-    restricted_appointments = appointments.Restrict(
-        f"[Start] >= '{lsds(period_start)}' AND [Start] < '{lsds(after_period_end)}'")
+    restriction_query = f"[Start] >= '{lsds(period_start)}' AND [Start] < '{lsds(after_period_end)}'"
+    restricted_appointments = appointments.Restrict( restriction_query )
 
     for appointment in restricted_appointments:
         if appointment.ResponseStatus not in [ olResponseDeclined, olResponseTentative ]:
@@ -100,7 +99,7 @@ def get_now_and_next( entries, cursor):
 
 def refresh_database(cursor):
     """ To be called infrequently, returns a tuple of ongoing, upcoming meetings. """
-    events = list( getCalendarEntries(4) )
+    events = list( getCalendarEntries(cursor,4) )
     return get_now_and_next( events, cursor )
 
 ## Code for UI topic
@@ -114,7 +113,7 @@ class TimerWidget(TK.Canvas):
         self.height = self.winfo_reqheight()
         self.width = self.winfo_reqwidth()
 
-        self.create_oval(CLOCK_PADDING, 
+        self.create_oval(CLOCK_PADDING,
                          CLOCK_PADDING,
                          self.height-CLOCK_PADDING,
                          self.height-CLOCK_PADDING,
@@ -153,17 +152,17 @@ class TimerWidget(TK.Canvas):
             self.itemconfig(self.clock_label, text=f'{int(minutes):02}:{seconds:02}')
         self.tag_raise(self.clock_label)
 
-        
+
     def set_arcs(self, angle_deltas):
-        """ given a list of degrees-of-arc, set the clockface to a series of arcs of those 
-            subtensions.  Each angle is incremental: [ 45, 45 ] occupies the first 90 degrees 
+        """ given a list of degrees-of-arc, set the clockface to a series of arcs of those
+            subtensions.  Each angle is incremental: [ 45, 45 ] occupies the first 90 degrees
             of the circle.
 
             Coordinate system is clockwise from north, whereas TkInter's is CCW from east.
         """
         while len(angle_deltas) < len(self.arcs):
             self.delete(self.arcs.pop())
-        
+
         start=90
         for index, angle_delta in enumerate(angle_deltas):
             extent=-angle_delta
@@ -194,7 +193,7 @@ class ResizingLabel(TK.Label):
         self['wraplength']=event.width
 
 class NowAndNextUI(TK.Frame):
-    """ TKInter main UI 
+    """ TKInter main UI
     """
     def __init__(self,master):
         TK.Frame.__init__(self,master,padx=15, pady=10)
@@ -206,7 +205,7 @@ class NowAndNextUI(TK.Frame):
         left_frame.pack(side=TK.LEFT)
 
         right_frame=TK.Frame(self, width=280, height=140)
-        self.next_label=ResizingLabel(right_frame, 
+        self.next_label=ResizingLabel(right_frame,
             text='Awaiting data...',
             anchor=TK.NW,
             wraplength=300,
@@ -227,13 +226,13 @@ class NowAndNextUI(TK.Frame):
 
             ongoing, upcoming = refresh_database(time_now)
             lines = [time_to_the_minute.strftime('%c')]
-            lines.extend(map(lambda ev: f'    {ev.subject}', ongoing )) 
+            lines.extend(map(lambda ev: f'    {ev.subject}', ongoing ))
 
             if len(upcoming):
                 self.next_deadline = upcoming[0].start
                 lines.append(f'Next:\n    {upcoming[0].subject}')
                 lines.extend(map(lambda ev: f'    +{int((ev.start-self.next_deadline).total_seconds() / 60)}m {ev.subject}', upcoming[1:]))
-                
+
                 # All except the first delay can be precalculated
                 self.following=list(map( lambda pair: pair[1].start-pair[0].start, zip( upcoming[:-1],upcoming[1:] )))
             else:
