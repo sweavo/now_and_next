@@ -20,7 +20,7 @@ CLOCK_FACE_COLOR='white'
 ARC_COLORS=['#ffaaaa', '#aaccff', '#ffaaff']
 CLOCK_PADDING=10
 
-UI_DATE_FORMAT='%c (CW%V)'
+UI_DATE_FORMAT='%Y-%m-%d %H:%M (CW%V)'
 
 ## Constants for Calendar/Outlook topic
 
