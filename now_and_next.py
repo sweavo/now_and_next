@@ -86,7 +86,7 @@ def get_standard_folder_items(ol_folder_id):
     ns = outlook_session.GetNamespace("MAPI")
     return ns.GetDefaultFolder(ol_folder_id).Items
 
-def get_calendar_entries_for_preiod(period_start, days=1):
+def get_calendar_entries_for_period(period_start, days=1):
     """ generator function to get the appointments from today for `days` days,
         retrieved from Outlook into a python structure
     """
@@ -127,7 +127,7 @@ def get_now_and_next( entries, cursor):
 
 def refresh_database(cursor):
     """ To be called infrequently, returns a tuple of ongoing, upcoming meetings. """
-    events = list( get_calendar_entries_for_preiod(cursor,4) )
+    events = list( get_calendar_entries_for_period(cursor,4) )
     return get_now_and_next( events, cursor )
 
 ## Code for UI topic
