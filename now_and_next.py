@@ -20,6 +20,8 @@ CLOCK_FACE_COLOR='white'
 ARC_COLORS=['#ffaaaa', '#aaccff', '#ffaaff']
 CLOCK_PADDING=10
 
+UI_DATE_FORMAT='%c (CW%V)'
+
 ## Constants for Calendar/Outlook topic
 
 olFolderCalendar=9
@@ -178,7 +180,6 @@ class TimerWidget(TK.Canvas):
             self.itemconfig(self.clock_label, text=f'{int(minutes):02}:{seconds:02}')
         self.tag_raise(self.clock_label)
 
-
     def set_arcs(self, angle_deltas):
         """ given a list of degrees-of-arc, set the clockface to a series of arcs of those
             subtensions.  Each angle is incremental: [ 45, 45 ] occupies the first 90 degrees
@@ -218,6 +219,7 @@ class ResizingLabel(TK.Label):
     def handle_resize(self,event):
         self['wraplength']=event.width
 
+
 class NowAndNextUI(TK.Frame):
     """ TKInter main UI
     """
@@ -251,7 +253,7 @@ class NowAndNextUI(TK.Frame):
             self.previous_minute = time_now.minute
 
             ongoing, upcoming = refresh_database(time_now)
-            lines = [time_to_the_minute.strftime('%c')]
+            lines = [time_to_the_minute.strftime(UI_DATE_FORMAT)]
             lines.extend(map(lambda ev: f'    {ev.subject}', ongoing ))
 
             if len(upcoming):
