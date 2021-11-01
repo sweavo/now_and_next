@@ -12,6 +12,7 @@ import win32com.client
 ## Constants for time topic
 
 DEBUG_TIME_OFFSET=datetime.timedelta(seconds=3600) # Manually set for BST, TODO get from the environment
+DEBUG_TIME_OFFSET=datetime.timedelta(seconds=0) # Manually set for GMT, TODO get from the environment
 #DEBUG_TIME_OFFSET=datetime.timedelta(hours=-16)
 
 ## Constants for UI topic
