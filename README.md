@@ -1,5 +1,7 @@
 # now_and_next
 
+**NOTICE:** Go to [JMAlego's Version](https://github.com/JMAlego/NowAndNext) unless you are masochistically passionate about python and tkinter
+
 Put time in your visual field so that you are not perpetually late for meetings.
 
 ![Screenshot](doc/img/screenshot1.png)
